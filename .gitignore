@@ -1,0 +1,43 @@
+# Rust build output
+/target/
+**/*.rs.bk
+
+# Local dictionaries can be large and may have separate licenses.
+*_words.yaml
+*.dict.yaml
+
+# Local assistant/editor state
+.claude/
+.codex/
+memory/
+.vscode/
+.idea/
+*.code-workspace
+
+# Logs and temporary files
+*.log
+*.tmp
+*.temp
+*.bak
+*.swp
+*.swo
+*~
+
+# OS metadata
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Ad-hoc Node tooling used for local conversion scripts
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+package-lock.json
+
+# Local archives and generated scratch files
+*.zip
+tmp/
+tmp_*/
+scratch/
