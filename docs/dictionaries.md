@@ -50,6 +50,21 @@ words:
 - 没有词频的词仍可用于拆词，但不参与词频速度调整。
 - 没有外部词库时，会使用 `src/typing/common_words.rs` 中的内置小词表。
 
+## 内置词库
+
+内置词库由两部分组成：
+
+- `src/typing/common_words.rs` 中的项目专用词。
+- `data/jieba_builtin_words.tsv` 中从 jieba 词库挑选的 1000 个日常高频中文词。
+
+`jieba_builtin_words.tsv` 使用制表符分隔：
+
+```text
+词<TAB>词频
+```
+
+这些词会在没有外部 `*_words.yaml` 时参与拆词和词频速度计算。第三方来源说明见根目录 `README.md` 末尾。
+
 ## 雾凇词库
 
 当前根目录的 `rime_ice_words.yaml` 是雾凇拼音词库裁剪后的本地版本，只保留拆词所需的 `text` 和 `frequency`。

@@ -17,14 +17,17 @@ AutoTyper 是一个 Rust TUI 自动输入工具。核心目标是把用户输入
 
 - `src/typing/config.rs`：输入配置。
 - `src/typing/token.rs`：输入 token 类型。
+- `src/typing/common_words.rs`：项目专用内置词和内置高频词入口。
 - `src/typing/tokenizer.rs`：文本 token 化和中文拆词。
 - `src/typing/dictionary.rs`：词典加载、词频范围和查询。
+- `src/typing/trie.rs`：中文词组最长匹配前缀树。
 - `src/typing/word_files.rs`：查找同级目录下的 `*_words.yaml`。
 - `src/typing/yaml_words.rs`：词库 YAML 解析。
 - `src/typing/frequency.rs`：词频后置倍率计算。
 - `src/typing/timing.rs`：输入延迟预算和分配。
 - `src/typing/engine.rs`：调用 `enigo` 实际输入。
 - `src/tui/*`：TUI 状态、渲染、配置页、主题和 View 实现。
+- `data/jieba_builtin_words.tsv`：从 jieba 词库挑选的 1000 个内置高频词，通过 `include_str!` 编进程序。
 
 ## 文档指引
 
@@ -83,6 +86,7 @@ Agent 使用方式：
 ## 词库约束
 
 - 词库文件必须使用 `*_words.yaml` 命名，程序会自动合并同级目录和可执行文件目录下的多份词库。
+- 没有外部词库时，会加载 `src/typing/common_words.rs` 和 `data/jieba_builtin_words.tsv` 的内置词。
 - YAML 需要兼容旧格式和带词频格式：
 
 ```yaml

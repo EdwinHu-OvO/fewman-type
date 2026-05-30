@@ -7,6 +7,7 @@ mod frequency;
 mod timing;
 mod token;
 mod tokenizer;
+mod trie;
 mod word_files;
 mod yaml_words;
 

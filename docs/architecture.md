@@ -32,14 +32,18 @@ src/
 | --- | --- |
 | `config.rs` | 输入配置结构 |
 | `token.rs` | `InputToken` 和 `TokenKind` |
+| `common_words.rs` | 项目专用内置词和内置高频词入口 |
 | `tokenizer.rs` | 文本 token 化，中文拆词 |
 | `dictionary.rs` | 词典加载、最长匹配、词频查询 |
+| `trie.rs` | 前缀树索引，用于中文词组最长匹配 |
 | `word_files.rs` | 查找同级目录和可执行文件目录下的 `*_words.yaml` |
 | `yaml_words.rs` | 解析旧格式和带词频格式 YAML |
 | `frequency.rs` | 根据词频计算后置速度倍率 |
 | `timing.rs` | 根据 token、词长、词频和配置计算延迟 |
 | `engine.rs` | 调用 `enigo` 输出键盘事件 |
 | `tests.rs` | typing 层单元测试 |
+
+内置高频词数据位于 `data/jieba_builtin_words.tsv`，通过 `include_str!` 编进程序。
 
 输入核心层对外只暴露：
 

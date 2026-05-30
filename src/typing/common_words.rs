@@ -1,4 +1,4 @@
-pub(crate) const COMMON_CHINESE_WORDS: &[&str] = &[
+const PROJECT_WORDS: &[&str] = &[
     "自动输入",
     "自动输入器",
     "雨课堂",
@@ -86,3 +86,17 @@ pub(crate) const COMMON_CHINESE_WORDS: &[&str] = &[
     "移动",
     "光标",
 ];
+
+const JIEBA_BUILTIN_WORDS: &str = include_str!("../../data/jieba_builtin_words.tsv");
+
+pub(crate) fn builtin_words() -> impl Iterator<Item = (&'static str, Option<u64>)> {
+    PROJECT_WORDS
+        .iter()
+        .map(|word| (*word, None))
+        .chain(JIEBA_BUILTIN_WORDS.lines().filter_map(parse_builtin_line))
+}
+
+fn parse_builtin_line(line: &'static str) -> Option<(&'static str, Option<u64>)> {
+    let (word, frequency) = line.split_once('\t')?;
+    Some((word, frequency.parse().ok()))
+}

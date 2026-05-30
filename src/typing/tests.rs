@@ -29,6 +29,20 @@ fn segments_common_chinese_words() {
 }
 
 #[test]
+fn segments_jieba_builtin_high_frequency_words() {
+    let tokens = tokenize("我们这个中国");
+    let words: Vec<_> = tokens.into_iter().map(|token| token.text).collect();
+    assert_eq!(words, vec!["我们", "这个", "中国"]);
+}
+
+#[test]
+fn trie_prefers_the_longest_overlapping_word() {
+    let tokens = tokenize("自动输入器");
+    let words: Vec<_> = tokens.into_iter().map(|token| token.text).collect();
+    assert_eq!(words, vec!["自动输入器"]);
+}
+
+#[test]
 fn keeps_ascii_words_together() {
     let tokens = tokenize("AutoTyper v1 测试");
     let words: Vec<_> = tokens.into_iter().map(|token| token.text).collect();
@@ -92,19 +106,19 @@ fn cjk_word_delay_uses_length_scales() {
         skip_word_inner_delay: false,
     };
     assert_eq!(
-        cjk_word_delay_budget_ms(&InputToken::new("你", TokenKind::CjkWord), config),
-        90
+        cjk_word_delay_budget_ms(&InputToken::new("龘", TokenKind::CjkWord), config),
+        100
     );
     assert_eq!(
-        cjk_word_delay_budget_ms(&InputToken::new("测试", TokenKind::CjkWord), config),
+        cjk_word_delay_budget_ms(&InputToken::new("龘龘", TokenKind::CjkWord), config),
         180
     );
     assert_eq!(
-        cjk_word_delay_budget_ms(&InputToken::new("三字词", TokenKind::CjkWord), config),
+        cjk_word_delay_budget_ms(&InputToken::new("龘龘龘", TokenKind::CjkWord), config),
         300
     );
     assert_eq!(
-        cjk_word_delay_budget_ms(&InputToken::new("自动输入器", TokenKind::CjkWord), config),
+        cjk_word_delay_budget_ms(&InputToken::new("龘龘龘龘龘", TokenKind::CjkWord), config),
         750
     );
 }

@@ -1,5 +1,6 @@
-use super::common_words::COMMON_CHINESE_WORDS;
+use super::common_words::builtin_words;
 use super::frequency::frequency_scale_per_mille;
+use super::trie::WordTrie;
 use super::word_files::dictionary_files;
 #[cfg(not(test))]
 use super::yaml_words::parse_yaml_word_entries;
@@ -17,6 +18,7 @@ pub(crate) struct WordEntry {
 
 struct WordDictionary {
     words: HashMap<String, WordEntry>,
+    trie: WordTrie,
     max_len: usize,
     min_frequency: u64,
     max_frequency: u64,
@@ -35,13 +37,7 @@ pub fn dictionary_sources() -> Vec<String> {
 pub(crate) fn longest_match(chars: &[char], index: usize) -> Option<usize> {
     let dictionary = WORD_DICTIONARY.get_or_init(load_word_dictionary);
     let max_len = (chars.len() - index).min(dictionary.max_len);
-    for len in (2..=max_len).rev() {
-        let word: String = chars[index..index + len].iter().collect();
-        if dictionary.words.contains_key(&word) {
-            return Some(len);
-        }
-    }
-    None
+    dictionary.trie.longest_match(chars, index, max_len)
 }
 
 pub(crate) fn word_frequency_scale_per_mille(word: &str) -> u64 {
@@ -67,9 +63,11 @@ fn load_word_dictionary() -> WordDictionary {
         .clamp(2, 12);
     let (min_frequency, max_frequency) =
         frequency_range(words.values().filter_map(|e| e.frequency));
+    let trie = WordTrie::from_words(words.keys(), max_len);
 
     WordDictionary {
         words,
+        trie,
         max_len,
         min_frequency,
         max_frequency,
@@ -86,9 +84,8 @@ fn frequency_range(mut frequencies: impl Iterator<Item = u64>) -> (u64, u64) {
 }
 
 fn common_words() -> HashMap<String, WordEntry> {
-    COMMON_CHINESE_WORDS
-        .iter()
-        .map(|word| ((*word).to_string(), WordEntry { frequency: None }))
+    builtin_words()
+        .map(|(word, frequency)| (word.to_string(), WordEntry { frequency }))
         .collect()
 }
 

@@ -38,7 +38,7 @@ cargo check
 | 新输入节奏 | `typing/timing.rs`, `typing/tests.rs` |
 | 新词频规则 | `typing/frequency.rs`, `typing/timing.rs` |
 | 新词库字段 | `typing/yaml_words.rs`, `typing/dictionary.rs` |
-| 新拆词规则 | `typing/tokenizer.rs`, `typing/dictionary.rs` |
+| 新拆词规则 | `typing/tokenizer.rs`, `typing/dictionary.rs`, `typing/trie.rs` |
 | 新 TUI 区域 | `tui/header.rs`, `tui/view.rs`, `tui/render.rs` |
 | 新全局热键 | `main.rs` |
 

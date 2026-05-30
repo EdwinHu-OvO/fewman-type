@@ -18,7 +18,7 @@
 | 任务 | 优先查看 | 主要文件 |
 | --- | --- | --- |
 | 修改输入配置 | `development.md` | `src/typing/config.rs`, `src/tui/config_page.rs` |
-| 修改拆词逻辑 | `typing-pipeline.md` | `src/typing/tokenizer.rs`, `src/typing/dictionary.rs` |
+| 修改拆词逻辑 | `typing-pipeline.md` | `src/typing/tokenizer.rs`, `src/typing/dictionary.rs`, `src/typing/trie.rs` |
 | 修改词频速度 | `typing-pipeline.md` | `src/typing/timing.rs`, `src/typing/frequency.rs` |
 | 修改词库格式 | `dictionaries.md` | `src/typing/yaml_words.rs`, `src/typing/word_files.rs` |
 | 修改 TUI 布局 | `tui.md` | `src/tui/header.rs`, `src/tui/view.rs`, `src/tui/config_page.rs` |
