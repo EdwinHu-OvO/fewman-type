@@ -85,6 +85,7 @@ words:
 
 - 项目地址：https://github.com/fxsjy/jieba
 - 许可文件：https://github.com/fxsjy/jieba/blob/master/LICENSE
+- 本地许可文本：`licenses/jieba-MIT-LICENSE.txt`
 - 原始版权声明：Copyright (c) 2013 Sun Junyi
 
 ---
