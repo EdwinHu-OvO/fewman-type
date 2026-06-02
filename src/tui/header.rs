@@ -69,15 +69,22 @@ impl InputPage {
         } else {
             "开启"
         };
+        let typo = if self.config.typo_simulation {
+            "开启"
+        } else {
+            "关闭"
+        };
+        // Keeping it at 9 lines by omitting dictionary detail line 1 when typo simulation is shown,
+        // or just compacting. We'll replace dictionary_detail_line(1) with typo status to keep layout.
         [
             "配置预览".to_string(),
             format!("当前页    {mode}"),
             format!("输入间隔  {} ms", self.config.base_interval_ms),
             format!("中文拆词  {split}"),
             format!("词内间隔  {inner}"),
+            format!("错字模拟  {typo}"),
             self.dictionary_summary_line(),
             self.dictionary_detail_line(0),
-            self.dictionary_detail_line(1),
             "触发键    Ctrl+V".to_string(),
         ]
     }

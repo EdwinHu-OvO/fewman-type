@@ -4,6 +4,15 @@ use super::dictionary::word_frequency_scale_per_mille;
 use super::token::{InputToken, TokenKind};
 use std::time::Duration;
 
+pub(crate) fn backspace_delay() -> Duration {
+    Duration::from_millis(100)
+}
+
+pub(crate) fn typo_retype_delay(token: &InputToken, salt: usize, config: TypingConfig) -> Duration {
+    let base = delay_inside(token, salt, config);
+    Duration::from_millis(((base.as_millis() as u64).saturating_mul(3) + 1) / 2)
+}
+
 pub(crate) fn delay_inside(token: &InputToken, salt: usize, config: TypingConfig) -> Duration {
     let base = config.base_interval_ms.max(5);
     match token.kind {

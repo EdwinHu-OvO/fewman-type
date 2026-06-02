@@ -1,4 +1,5 @@
 use super::common_words::builtin_words;
+use super::dictionary_typo;
 use super::frequency::frequency_scale_per_mille;
 use super::trie::WordTrie;
 use super::word_files::dictionary_files;
@@ -19,6 +20,7 @@ pub(crate) struct WordEntry {
 struct WordDictionary {
     words: HashMap<String, WordEntry>,
     trie: WordTrie,
+    typo_prefixes: HashMap<String, Vec<String>>,
     max_len: usize,
     min_frequency: u64,
     max_frequency: u64,
@@ -64,10 +66,12 @@ fn load_word_dictionary() -> WordDictionary {
     let (min_frequency, max_frequency) =
         frequency_range(words.values().filter_map(|e| e.frequency));
     let trie = WordTrie::from_words(words.keys(), max_len);
+    let typo_prefixes = dictionary_typo::build_typo_prefixes(words.keys());
 
     WordDictionary {
         words,
         trie,
+        typo_prefixes,
         max_len,
         min_frequency,
         max_frequency,
@@ -103,6 +107,11 @@ fn load_words() -> HashMap<String, WordEntry> {
         }
     }
     words
+}
+
+pub(crate) fn typo_candidate_for_word(word: &str, salt: usize) -> Option<String> {
+    let dictionary = WORD_DICTIONARY.get_or_init(load_word_dictionary);
+    dictionary_typo::typo_candidate_for_word(word, salt, &dictionary.typo_prefixes)
 }
 
 #[cfg(not(test))]

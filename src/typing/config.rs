@@ -3,6 +3,7 @@ pub struct TypingConfig {
     pub cjk_segmentation: bool,
     pub base_interval_ms: u64,
     pub skip_word_inner_delay: bool,
+    pub typo_simulation: bool,
 }
 
 impl Default for TypingConfig {
@@ -11,6 +12,7 @@ impl Default for TypingConfig {
             cjk_segmentation: true,
             base_interval_ms: 50,
             skip_word_inner_delay: false,
+            typo_simulation: false,
         }
     }
 }

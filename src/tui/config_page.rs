@@ -13,6 +13,7 @@ impl InputPage {
             "中文拆词模式",
             "输入间隔",
             "实验：关闭词组内间隔",
+            "错字模拟",
         ];
         let values = self.config_values();
 
@@ -37,7 +38,7 @@ impl InputPage {
                 EventResult::consumed()
             }
             Event::Key(Key::Down) => {
-                self.selected_config = (self.selected_config + 1).min(2);
+                self.selected_config = (self.selected_config + 1).min(3);
                 EventResult::consumed()
             }
             Event::Key(Key::Left) => self.adjust_interval(-5),
@@ -47,13 +48,18 @@ impl InputPage {
         }
     }
 
-    fn config_values(&self) -> [String; 6] {
+    fn config_values(&self) -> [String; 7] {
         let split = if self.config.cjk_segmentation {
             "开启"
         } else {
             "关闭"
         };
         let inner = if self.config.skip_word_inner_delay {
+            "开启"
+        } else {
+            "关闭"
+        };
+        let typo = if self.config.typo_simulation {
             "开启"
         } else {
             "关闭"
@@ -65,6 +71,7 @@ impl InputPage {
             format!("[{split}]"),
             format!("{} ms", self.config.base_interval_ms),
             format!("[{inner}]"),
+            format!("[{typo}]"),
         ]
     }
 
@@ -99,6 +106,7 @@ impl InputPage {
         match self.selected_config {
             0 => self.config.cjk_segmentation = !self.config.cjk_segmentation,
             2 => self.config.skip_word_inner_delay = !self.config.skip_word_inner_delay,
+            3 => self.config.typo_simulation = !self.config.typo_simulation,
             _ => return EventResult::consumed(),
         }
         self.mirror_config();
