@@ -1,3 +1,4 @@
+use super::char_class::stable_jitter_text;
 use super::dictionary::typo_candidate_for_word;
 use super::token::{InputToken, TokenKind};
 
@@ -43,4 +44,15 @@ pub(crate) fn plan_for_token(token: &InputToken, salt: usize) -> Option<TypoPlan
         backspaces,
         retype_text,
     })
+}
+
+pub(crate) fn should_apply_typo(text: &str, salt: usize, rate_percent: u8) -> bool {
+    let rate = rate_percent.min(100);
+    if rate == 0 {
+        return false;
+    }
+    if rate == 100 {
+        return true;
+    }
+    (stable_jitter_text(text, salt) % 100) < (rate as u64)
 }

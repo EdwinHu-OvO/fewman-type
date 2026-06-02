@@ -82,7 +82,7 @@ impl InputPage {
             format!("输入间隔  {} ms", self.config.base_interval_ms),
             format!("中文拆词  {split}"),
             format!("词内间隔  {inner}"),
-            format!("错字模拟  {typo}"),
+            format!("错字模拟  {typo} {}%", self.config.typo_rate_percent),
             self.dictionary_summary_line(),
             self.dictionary_detail_line(0),
             "触发键    Ctrl+V".to_string(),

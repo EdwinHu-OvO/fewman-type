@@ -57,7 +57,7 @@ fn main() {
     println!("==================================================");
     println!("准备就绪！文本长度: {} 个字符", final_text.chars().count());
     println!(
-        "中文拆词: {} | 输入间隔: {} ms | 词内间隔: {} | 错字模拟: {}",
+        "中文拆词: {} | 输入间隔: {} ms | 词内间隔: {} | 错字模拟: {} | 错字率: {}%",
         if session.config.cjk_segmentation {
             "开启"
         } else {
@@ -73,7 +73,8 @@ fn main() {
             "开启"
         } else {
             "关闭"
-        }
+        },
+        session.config.typo_rate_percent
     );
     let dictionaries = typing::dictionary_sources();
     if dictionaries.is_empty() {

@@ -14,6 +14,7 @@ impl InputPage {
             "输入间隔",
             "实验：关闭词组内间隔",
             "错字模拟",
+            "错字率",
         ];
         let values = self.config_values();
 
@@ -38,17 +39,17 @@ impl InputPage {
                 EventResult::consumed()
             }
             Event::Key(Key::Down) => {
-                self.selected_config = (self.selected_config + 1).min(3);
+                self.selected_config = (self.selected_config + 1).min(4);
                 EventResult::consumed()
             }
-            Event::Key(Key::Left) => self.adjust_interval(-5),
-            Event::Key(Key::Right) => self.adjust_interval(5),
+            Event::Key(Key::Left) => self.adjust_selected_number(-5),
+            Event::Key(Key::Right) => self.adjust_selected_number(5),
             Event::Char(' ') => self.toggle_selected_config(),
             _ => EventResult::Ignored,
         }
     }
 
-    fn config_values(&self) -> [String; 7] {
+    fn config_values(&self) -> [String; 8] {
         let split = if self.config.cjk_segmentation {
             "开启"
         } else {
@@ -72,6 +73,7 @@ impl InputPage {
             format!("{} ms", self.config.base_interval_ms),
             format!("[{inner}]"),
             format!("[{typo}]"),
+            format!("{}%", self.config.typo_rate_percent),
         ]
     }
 
@@ -93,11 +95,19 @@ impl InputPage {
         }
     }
 
-    fn adjust_interval(&mut self, delta: i64) -> EventResult {
-        if self.selected_config == 1 {
-            let value = (self.config.base_interval_ms as i64 + delta).clamp(10, 1000);
-            self.config.base_interval_ms = value as u64;
-            self.mirror_config();
+    fn adjust_selected_number(&mut self, delta: i64) -> EventResult {
+        match self.selected_config {
+            1 => {
+                let value = (self.config.base_interval_ms as i64 + delta).clamp(10, 1000);
+                self.config.base_interval_ms = value as u64;
+                self.mirror_config();
+            }
+            4 => {
+                let value = (self.config.typo_rate_percent as i64 + delta).clamp(0, 100);
+                self.config.typo_rate_percent = value as u8;
+                self.mirror_config();
+            }
+            _ => {}
         }
         EventResult::consumed()
     }

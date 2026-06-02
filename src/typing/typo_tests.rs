@@ -2,7 +2,31 @@
 mod typo_tests {
     use crate::typing::dictionary_typo::{build_typo_prefixes, typo_candidate_for_word};
     use crate::typing::token::{InputToken, TokenKind};
-    use crate::typing::typo::plan_for_token;
+    use crate::typing::typo::{plan_for_token, should_apply_typo};
+
+    #[test]
+    fn typo_rate_zero_never_applies() {
+        assert!(!should_apply_typo("因为", 0, 0));
+        assert!(!should_apply_typo("因为", 99, 0));
+    }
+
+    #[test]
+    fn typo_rate_hundred_always_applies() {
+        assert!(should_apply_typo("因为", 0, 100));
+        assert!(should_apply_typo("因为", 99, 100));
+    }
+
+    #[test]
+    fn typo_rate_is_deterministic() {
+        let first = should_apply_typo("因为", 42, 15);
+        let second = should_apply_typo("因为", 42, 15);
+        assert_eq!(first, second);
+    }
+
+    #[test]
+    fn typo_rate_clamps_above_hundred() {
+        assert!(should_apply_typo("因为", 42, 255));
+    }
 
     #[test]
     fn prefix_building_and_candidate_lookup() {

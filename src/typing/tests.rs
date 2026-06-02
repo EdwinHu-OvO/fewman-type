@@ -58,6 +58,7 @@ fn can_disable_chinese_segmentation() {
             base_interval_ms: 50,
             skip_word_inner_delay: false,
             typo_simulation: false,
+            typo_rate_percent: 15,
         },
     );
     let words: Vec<_> = tokens.into_iter().map(|token| token.text).collect();
@@ -72,6 +73,7 @@ fn cjk_word_total_delay_matches_budget_before_the_word() {
         base_interval_ms: 50,
         skip_word_inner_delay: false,
         typo_simulation: false,
+        typo_rate_percent: 15,
     };
     let char_count = token.text.chars().count() as u128;
     let inner_total: u128 = (0..char_count.saturating_sub(1))
@@ -91,6 +93,7 @@ fn can_skip_cjk_word_inner_delay() {
         base_interval_ms: 50,
         skip_word_inner_delay: true,
         typo_simulation: false,
+        typo_rate_percent: 15,
     };
     let char_count = token.text.chars().count() as u128;
     assert_eq!(delay_inside(&token, 0, config), std::time::Duration::ZERO);
@@ -108,6 +111,7 @@ fn cjk_word_delay_uses_length_scales() {
         base_interval_ms: 100,
         skip_word_inner_delay: false,
         typo_simulation: false,
+        typo_rate_percent: 15,
     };
     assert_eq!(
         cjk_word_delay_budget_ms(&InputToken::new("龘", TokenKind::CjkWord), config),

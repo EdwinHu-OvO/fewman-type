@@ -2,7 +2,7 @@ use super::config::TypingConfig;
 use super::timing::{backspace_delay, delay_after, delay_before, delay_inside, typo_retype_delay};
 use super::token::{InputToken, TokenKind};
 use super::tokenizer::tokenize_with_config;
-use super::typo::plan_for_token;
+use super::typo::{plan_for_token, should_apply_typo};
 use enigo::{Enigo, KeyboardControllable};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::thread;
@@ -46,7 +46,7 @@ fn type_token(
     config: TypingConfig,
     should_exit: &AtomicBool,
 ) -> bool {
-    if config.typo_simulation {
+    if config.typo_simulation && should_apply_typo(&token.text, index, config.typo_rate_percent) {
         if let Some(plan) = plan_for_token(token, index) {
             return execute_typo_plan(enigo, token, index, config, should_exit, plan);
         }
