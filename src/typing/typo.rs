@@ -1,4 +1,5 @@
 use super::char_class::stable_jitter_text;
+use super::config::TypingConfig;
 use super::dictionary::typo_candidate_for_word;
 use super::token::{InputToken, TokenKind};
 
@@ -44,6 +45,10 @@ pub(crate) fn plan_for_token(token: &InputToken, salt: usize) -> Option<TypoPlan
         backspaces,
         retype_text,
     })
+}
+
+pub(crate) fn can_simulate_typo(config: TypingConfig) -> bool {
+    config.typo_simulation && config.base_interval_ms >= 50
 }
 
 pub(crate) fn should_apply_typo(text: &str, salt: usize, rate_percent: u8) -> bool {

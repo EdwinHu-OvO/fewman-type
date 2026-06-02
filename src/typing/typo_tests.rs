@@ -1,8 +1,26 @@
 #[cfg(test)]
 mod typo_tests {
+    use crate::typing::TypingConfig;
     use crate::typing::dictionary_typo::{build_typo_prefixes, typo_candidate_for_word};
     use crate::typing::token::{InputToken, TokenKind};
-    use crate::typing::typo::{plan_for_token, should_apply_typo};
+    use crate::typing::typo::{can_simulate_typo, plan_for_token, should_apply_typo};
+
+    fn config(base_interval_ms: u64, typo_simulation: bool) -> TypingConfig {
+        TypingConfig {
+            cjk_segmentation: true,
+            base_interval_ms,
+            skip_word_inner_delay: false,
+            typo_simulation,
+            typo_rate_percent: 15,
+        }
+    }
+
+    #[test]
+    fn typo_simulation_requires_human_interval() {
+        assert!(!can_simulate_typo(config(49, true)));
+        assert!(can_simulate_typo(config(50, true)));
+        assert!(!can_simulate_typo(config(50, false)));
+    }
 
     #[test]
     fn typo_rate_zero_never_applies() {
@@ -40,21 +58,10 @@ mod typo_tests {
         ];
         let prefixes = build_typo_prefixes(words.iter());
 
-        // Single char word, should return None
         assert_eq!(typo_candidate_for_word("我", 0, &prefixes), None);
 
-        // Word "自动输入器", length 5.
-        // It shares "自动输入" (len 4) with "自动输入法"
-        // It shares "自动" (len 2) with "自定义", "自动化", "自动" (wait, "自动" is len 2, exactly equal to prefix length, so valid_candidates logic should keep it? Actually "自动" matches prefix len 2 of "自动输入器", but "自动" has no characters AFTER the prefix. Our rule says it shouldn't match a longer prefix, and c.as_str() != word. If c == "自动", common len is 2. But we only query `len = 1` up to `n-1`. For `len=1`, prefix is "自". The common len with "自动" is 2. So it won't match `len=1` exact. For `len=2`, common len is 2. Is "自动" a valid typo for "自动输入器" with keep_chars=2? That would mean backspaces=0. Let's see what plan_for_token does with it. It returns None if backspaces=0.)
-        // But the first prefix length checked is 1 ("自").
-        // "自定义" shares "自" ? No, common_len is 2 ("自动"). So it fails exact len match.
-        // Wait, "自动" is common prefix of "自定义" and "自动输入器". So common_len is 2.
-        // So for len=1, there are NO candidates that share EXACTLY 1 char.
-        // For len=2, candidates are "自定义", "自动化", "自动" (common_len=2).
-        // If "自动" is chosen, candidate="自动", common_len=2. wrong_chars=2, keep_chars=2, backspaces=0.
-        // Let's check what `typo_candidate_for_word` actually returns.
         let candidate = typo_candidate_for_word("自动输入器", 0, &prefixes).unwrap();
-        assert!(candidate == "自定义" || candidate == "自动化" || candidate == "自动");
+        assert_eq!(candidate, "自定义");
     }
 
     #[test]

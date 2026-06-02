@@ -20,7 +20,7 @@ pub(crate) struct WordEntry {
 struct WordDictionary {
     words: HashMap<String, WordEntry>,
     trie: WordTrie,
-    typo_prefixes: HashMap<String, Vec<String>>,
+    typo_prefixes: OnceLock<HashMap<String, Vec<String>>>,
     max_len: usize,
     min_frequency: u64,
     max_frequency: u64,
@@ -66,12 +66,11 @@ fn load_word_dictionary() -> WordDictionary {
     let (min_frequency, max_frequency) =
         frequency_range(words.values().filter_map(|e| e.frequency));
     let trie = WordTrie::from_words(words.keys(), max_len);
-    let typo_prefixes = dictionary_typo::build_typo_prefixes(words.keys());
 
     WordDictionary {
         words,
         trie,
-        typo_prefixes,
+        typo_prefixes: OnceLock::new(),
         max_len,
         min_frequency,
         max_frequency,
@@ -111,7 +110,10 @@ fn load_words() -> HashMap<String, WordEntry> {
 
 pub(crate) fn typo_candidate_for_word(word: &str, salt: usize) -> Option<String> {
     let dictionary = WORD_DICTIONARY.get_or_init(load_word_dictionary);
-    dictionary_typo::typo_candidate_for_word(word, salt, &dictionary.typo_prefixes)
+    let typo_prefixes = dictionary
+        .typo_prefixes
+        .get_or_init(|| dictionary_typo::build_typo_prefixes(dictionary.words.keys()));
+    dictionary_typo::typo_candidate_for_word(word, salt, typo_prefixes)
 }
 
 #[cfg(not(test))]

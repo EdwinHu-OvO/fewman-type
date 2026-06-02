@@ -11,9 +11,11 @@ impl Default for TypingConfig {
     fn default() -> Self {
         Self {
             cjk_segmentation: true,
-            base_interval_ms: 50,
-            skip_word_inner_delay: false,
-            typo_simulation: false,
+            // 350 for testing
+            base_interval_ms: 350,
+            // for testing
+            skip_word_inner_delay: true,
+            typo_simulation: true,
             typo_rate_percent: 15,
         }
     }

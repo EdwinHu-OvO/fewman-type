@@ -74,8 +74,6 @@ impl InputPage {
         } else {
             "关闭"
         };
-        // Keeping it at 9 lines by omitting dictionary detail line 1 when typo simulation is shown,
-        // or just compacting. We'll replace dictionary_detail_line(1) with typo status to keep layout.
         [
             "配置预览".to_string(),
             format!("当前页    {mode}"),

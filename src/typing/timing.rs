@@ -4,13 +4,33 @@ use super::dictionary::word_frequency_scale_per_mille;
 use super::token::{InputToken, TokenKind};
 use std::time::Duration;
 
-pub(crate) fn backspace_delay() -> Duration {
-    Duration::from_millis(100)
+pub(crate) fn backspace_delay(config: TypingConfig) -> Duration {
+    Duration::from_millis(
+        config
+            .base_interval_ms
+            .max(5)
+            .saturating_mul(500)
+            .saturating_div(1000)
+            .min(800),
+    )
+}
+
+pub(crate) fn first_backspace_delay(config: TypingConfig) -> Duration {
+    Duration::from_millis(backspace_delay(config).as_millis() as u64 * 6 / 5)
 }
 
 pub(crate) fn typo_retype_delay(token: &InputToken, salt: usize, config: TypingConfig) -> Duration {
-    let base = delay_inside(token, salt, config);
+    let base = typo_retype_base_delay(token, salt, config);
     Duration::from_millis(((base.as_millis() as u64).saturating_mul(3) + 1) / 2)
+}
+
+fn typo_retype_base_delay(token: &InputToken, salt: usize, config: TypingConfig) -> Duration {
+    match token.kind {
+        TokenKind::CjkWord => Duration::from_millis(
+            cjk_word_delay_budget_ms(token, config) / cjk_word_char_count(token),
+        ),
+        _ => delay_inside(token, salt, config),
+    }
 }
 
 pub(crate) fn delay_inside(token: &InputToken, salt: usize, config: TypingConfig) -> Duration {

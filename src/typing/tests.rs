@@ -1,6 +1,9 @@
 use super::TypingConfig;
 use super::frequency::frequency_scale_per_mille;
-use super::timing::{cjk_word_delay_budget_ms, delay_after, delay_before, delay_inside};
+use super::timing::{
+    backspace_delay, cjk_word_delay_budget_ms, delay_after, delay_before, delay_inside,
+    first_backspace_delay, typo_retype_delay,
+};
 use super::token::{InputToken, TokenKind};
 use super::tokenizer::tokenize_with_config;
 use super::yaml_words::parse_yaml_word_entries;
@@ -129,6 +132,51 @@ fn cjk_word_delay_uses_length_scales() {
         cjk_word_delay_budget_ms(&InputToken::new("龘龘龘龘龘", TokenKind::CjkWord), config),
         750
     );
+}
+
+#[test]
+fn first_backspace_delay_is_slowed_by_twenty_percent() {
+    let config = TypingConfig {
+        cjk_segmentation: true,
+        base_interval_ms: 50,
+        skip_word_inner_delay: false,
+        typo_simulation: false,
+        typo_rate_percent: 15,
+    };
+    assert_eq!(backspace_delay(config).as_millis(), 25);
+    assert_eq!(first_backspace_delay(config).as_millis(), 30);
+}
+
+#[test]
+fn backspace_delay_smoothly_caps_at_eight_hundred_ms() {
+    let config = |base_interval_ms| TypingConfig {
+        cjk_segmentation: true,
+        base_interval_ms,
+        skip_word_inner_delay: false,
+        typo_simulation: false,
+        typo_rate_percent: 15,
+    };
+
+    assert_eq!(backspace_delay(config(800)).as_millis(), 400);
+    assert_eq!(backspace_delay(config(801)).as_millis(), 400);
+    assert_eq!(backspace_delay(config(1599)).as_millis(), 799);
+    assert_eq!(backspace_delay(config(1600)).as_millis(), 800);
+    assert_eq!(backspace_delay(config(1601)).as_millis(), 800);
+}
+
+#[test]
+fn typo_retype_delay_uses_cjk_budget_when_inner_delay_is_skipped() {
+    let token = InputToken::new("自动输入器", TokenKind::CjkWord);
+    let config = TypingConfig {
+        cjk_segmentation: true,
+        base_interval_ms: 50,
+        skip_word_inner_delay: true,
+        typo_simulation: true,
+        typo_rate_percent: 15,
+    };
+
+    assert_eq!(delay_inside(&token, 0, config), std::time::Duration::ZERO);
+    assert_eq!(typo_retype_delay(&token, 0, config).as_millis(), 113);
 }
 
 #[test]
