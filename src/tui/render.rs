@@ -6,9 +6,9 @@ pub(super) const FOOTER_LINE: &str = " Ctrl+Enter / F2 提交  |  Esc 退出 ";
 pub(super) const FIXED_HEIGHT: usize = HEADER_HEIGHT + 3;
 
 pub(super) const LOGO_LINES: [&str; 3] = [
-    " ╔═╗╦ ╦╔╦╗╔═╗  ╔╦╗╦ ╦╔═╗╔═╗╦═╗",
-    " ╠═╣║ ║ ║ ║ ║   ║ ╚╦╝╠═╝║╣ ╠╦╝",
-    " ╩ ╩╚═╝ ╩ ╚═╝   ╩  ╩ ╩  ╚═╝╩╚═",
+    "  ╔═╗┌─┐┬ ┬┌┬┐┌─┐┌┐┌",
+    "  ╠╣ ├┤ ││││││├─┤│││",
+    "  ╚  └─┘└┴┘┴ ┴┴ ┴┘└┘  TYPE",
 ];
 
 pub(super) fn input_y() -> usize {

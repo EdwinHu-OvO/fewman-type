@@ -88,7 +88,7 @@ fn draw_frame(printer: &Printer, right: usize, bottom: usize, divider_x: usize) 
         printer.print((0, 0), "╭");
         printer.print_hline((1, 0), printer.size.x.saturating_sub(2), "─");
         printer.print((right, 0), "╮");
-        printer.print((2, 0), " AutoTyper ");
+        printer.print((2, 0), " FewmanType ");
 
         for y in 1..bottom {
             printer.print((0, y), "│");
