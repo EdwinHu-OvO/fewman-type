@@ -1,6 +1,6 @@
-# 输入流程与延迟策略
+# 输入流程、错字模拟与延迟策略
 
-本文说明文本如何变成键盘输入，以及当前类人输入节奏是怎么计算的。
+本文说明文本如何变成键盘输入，错字模拟如何插入输入流程，以及当前类人输入节奏是怎么计算的。
 
 ## 流程概览
 
@@ -9,14 +9,17 @@
   -> tokenize_with_config
   -> InputToken 列表
   -> delay_before
-  -> type_token / press_return
-  -> delay_inside
+  -> 可选 typo plan
+  -> type_token / typo wrong-backspace-retype / press_return
+  -> delay_inside / backspace_delay / typo_retype_delay
   -> delay_after
 ```
 
 对应文件：
 
 - `src/typing/tokenizer.rs`
+- `src/typing/typo.rs`
+- `src/typing/dictionary_typo.rs`
 - `src/typing/timing.rs`
 - `src/typing/engine.rs`
 
@@ -43,6 +46,24 @@
 - 关闭中文拆词时，每个 CJK 字符都是一个 `CjkWord`。
 
 Trie 匹配位于 `src/typing/trie.rs`。它从当前位置逐字向前走前缀树，并记录最后一个命中的词尾，避免为每个候选窗口反复构造 `String`。
+
+## 错字模拟
+
+错字模拟目前只作用于 `CjkWord`。开启条件：
+
+- `TypingConfig.typo_simulation` 为 `true`。
+- `base_interval_ms >= 50`，避免在过快输入模式下硬塞错字。
+- `typo_rate_percent` 通过稳定抖动决定是否命中，同一文本和位置的结果保持确定。
+
+候选词来自当前加载的词库和内置词库。`dictionary_typo.rs` 会为每个词的非完整前缀建立索引，查询时从长度 `1` 到 `n - 1` 依次尝试，因此优先选择能产生候选的最短共同前缀。候选必须与正确词共享这个前缀，且不能是正确词本身；多个候选用稳定抖动确定一个结果。
+
+`typo.rs` 会把候选词转换成输入计划：
+
+```text
+wrong_text -> backspaces -> retype_text
+```
+
+执行时，`engine.rs` 会先输入错误词，再退格删除错误后缀，最后重打正确后缀。当前错字来源是词库前缀相似，不基于拼音相似度或键盘物理位置。
 
 ## 中文词组延迟
 
@@ -100,5 +121,7 @@ Trie 匹配位于 `src/typing/trie.rs`。它从当前位置逐字向前走前缀
 - 改中文预算公式：优先改 `cjk_word_delay_budget_ms`。
 - 改词长倍率：优先改 `cjk_word_delay_scale_tenths`。
 - 改词频影响：优先改 `src/typing/frequency.rs`。
+- 改错字候选：优先改 `src/typing/dictionary_typo.rs`。
+- 改错字计划或触发条件：优先改 `src/typing/typo.rs`。
 - 改词前/词内/词后分配：改 `delay_before`、`delay_inside`、`delay_after`。
-- 每次修改输入节奏，都需要更新 `src/typing/tests.rs`。
+- 每次修改输入节奏，都需要更新 `src/typing/tests.rs`；修改错字模拟时同步更新 `src/typing/typo_tests.rs`。

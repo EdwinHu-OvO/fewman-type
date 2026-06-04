@@ -32,11 +32,14 @@ src/
 | --- | --- |
 | `config.rs` | 输入配置结构 |
 | `token.rs` | `InputToken` 和 `TokenKind` |
+| `char_class.rs` | 字符分类和稳定抖动 |
 | `common_words.rs` | 项目专用内置词和内置高频词入口 |
 | `tokenizer.rs` | 文本 token 化，中文拆词 |
 | `dictionary.rs` | 词典加载、最长匹配、词频查询 |
 | `trie.rs` | 前缀树索引，用于中文词组最长匹配 |
-| `word_files.rs` | 查找同级目录和可执行文件目录下的 `*_words.yaml` |
+| `dictionary_typo.rs` | 基于词库前缀构造错字候选 |
+| `typo.rs` | 生成中文错字输入、退格和重打计划 |
+| `word_files.rs` | 查找可执行文件同目录下的 `*_words.yaml` |
 | `yaml_words.rs` | 解析旧格式和带词频格式 YAML |
 | `frequency.rs` | 根据词频计算后置速度倍率 |
 | `timing.rs` | 根据 token、词长、词频和配置计算延迟 |
@@ -77,13 +80,15 @@ TUI 输入文本和配置
   -> main.rs 等待 Ctrl+V
   -> typing::type_text
   -> tokenizer 拆成 token
-  -> timing 计算词前/词内/词后延迟
+  -> 可选 typo 计划生成错误词、退格和重打内容
+  -> timing 计算词前/词内/词后、退格和重打延迟
   -> engine 调用 enigo 输出
 ```
 
 ## 维护边界
 
 - 新增输入节奏规则：改 `typing/timing.rs`，必要时改 `typing/frequency.rs`。
+- 新增错字模拟规则：改 `typing/typo.rs`、`typing/dictionary_typo.rs`，必要时改 `typing/engine.rs` 和 `typing/timing.rs`。
 - 新增词库字段：改 `typing/yaml_words.rs` 和 `typing/dictionary.rs`。
 - 新增 TUI 配置项：同时改 `typing/config.rs`、`tui/config_page.rs`、`tui/header.rs`。
 - 新增触发热键：优先改 `main.rs`，不要把全局热键逻辑放进 TUI。

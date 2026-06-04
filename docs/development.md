@@ -37,6 +37,7 @@ cargo check
 | 新配置项 | `typing/config.rs`, `tui/config_page.rs`, `tui/header.rs` |
 | 新输入节奏 | `typing/timing.rs`, `typing/tests.rs` |
 | 新词频规则 | `typing/frequency.rs`, `typing/timing.rs` |
+| 新错字模拟规则 | `typing/typo.rs`, `typing/dictionary_typo.rs`, `typing/engine.rs` |
 | 新词库字段 | `typing/yaml_words.rs`, `typing/dictionary.rs` |
 | 新拆词规则 | `typing/tokenizer.rs`, `typing/dictionary.rs`, `typing/trie.rs` |
 | 新 TUI 区域 | `tui/header.rs`, `tui/view.rs`, `tui/render.rs` |
@@ -55,6 +56,9 @@ cargo check
 - 词长倍率。
 - YAML 词频解析。
 - 词频倍率不会快于 `1.0x`。
+- 错字模拟启用阈值和错字率命中规则。
+- 基于最短前缀的错字候选查找。
+- 错字输入计划的基本合法性。
 
 修改这些行为时要同步更新测试。
 
@@ -80,7 +84,7 @@ Get-ChildItem -Recurse -Path src -File |
 
 ## 数据文件约束
 
-- `rime_ice_words.yaml` 是运行数据，不是源码。
+- `rime_ice_words.yaml` 是运行数据，不是源码；默认加载位置是可执行文件同目录，不是项目根目录。
 - 不要提交临时下载脚本。
 - 不要提交上游完整词库目录。
 - 保持 `*_words.yaml` 的旧格式兼容。

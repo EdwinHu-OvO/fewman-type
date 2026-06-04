@@ -18,11 +18,14 @@ AutoTyper 是一个 Rust TUI 自动输入工具。核心目标是把用户输入
 
 - `src/typing/config.rs`：输入配置。
 - `src/typing/token.rs`：输入 token 类型。
+- `src/typing/char_class.rs`：字符分类和稳定抖动。
 - `src/typing/common_words.rs`：项目专用内置词和内置高频词入口。
 - `src/typing/tokenizer.rs`：文本 token 化和中文拆词。
 - `src/typing/dictionary.rs`：词典加载、词频范围和查询。
 - `src/typing/trie.rs`：中文词组最长匹配前缀树。
-- `src/typing/word_files.rs`：查找同级目录下的 `*_words.yaml`。
+- `src/typing/dictionary_typo.rs`：基于词库前缀的错字候选。
+- `src/typing/typo.rs`：错字模拟计划和触发规则。
+- `src/typing/word_files.rs`：查找可执行文件同目录下的 `*_words.yaml`。
 - `src/typing/yaml_words.rs`：词库 YAML 解析。
 - `src/typing/frequency.rs`：词频后置倍率计算。
 - `src/typing/timing.rs`：输入延迟预算和分配。
@@ -86,8 +89,8 @@ Agent 使用方式：
 
 ## 词库约束
 
-- 词库文件必须使用 `*_words.yaml` 命名，程序会自动合并同级目录和可执行文件目录下的多份词库。
-- 没有外部词库时，会加载 `src/typing/common_words.rs` 和 `data/jieba_builtin_words.tsv` 的内置词。
+- 词库文件必须使用 `*_words.yaml` 命名，程序只会自动合并可执行文件同目录下的多份词库。
+- 程序会先加载 `src/typing/common_words.rs` 和 `data/jieba_builtin_words.tsv` 的内置词，再合并外部词库；没有外部词库时仅使用内置词。
 - YAML 需要兼容旧格式和带词频格式：
 
 ```yaml
@@ -98,6 +101,13 @@ words:
 ```
 
 - 不要把下载脚本、原始上游词库或临时转换产物长期放进项目；本项目只保留裁剪后的本地词库 YAML。
+
+## 错字模拟约束
+
+- 当前错字模拟只对 CJK token 生效，候选来自合并后的词库文本。
+- 候选查找使用共享最短非完整前缀，不基于拼音相似度或键盘物理位置。
+- 只有 `typo_simulation` 开启且 `base_interval_ms >= 50` 时启用错字模拟。
+- 修改错字候选或计划时更新 `src/typing/typo_tests.rs`；如果改退格或重打延迟，也要更新 `src/typing/tests.rs`。
 
 ## 延迟策略约束
 
