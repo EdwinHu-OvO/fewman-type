@@ -27,8 +27,15 @@ pub(crate) enum InputAction {
     MoveRight,
 }
 
-pub(crate) fn plan_input_actions(tokens: Vec<InputToken>) -> Vec<InputAction> {
+pub(crate) fn plan_input_actions(tokens: Vec<InputToken>, pair_matching: bool) -> Vec<InputAction> {
     let indexed_tokens: Vec<(usize, InputToken)> = tokens.into_iter().enumerate().collect();
+    if !pair_matching {
+        return indexed_tokens
+            .into_iter()
+            .map(|(token_index, token)| InputAction::Token { token, token_index })
+            .collect();
+    }
+
     let mut actions = Vec::new();
     plan_range(&indexed_tokens, 0, indexed_tokens.len(), &mut actions);
     actions

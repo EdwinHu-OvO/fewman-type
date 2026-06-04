@@ -57,8 +57,14 @@ fn main() {
     println!("==================================================");
     println!("准备就绪！文本长度: {} 个字符", final_text.chars().count());
     println!(
-        "中文拆词: {} | 输入间隔: {} ms | 词内间隔: {} | 错字模拟: {} | 错字率: {}%",
+        "预设: {} | 中文拆词: {} | 符号匹配: {} | 输入间隔: {} ms | 词内间隔: {} | 错字模拟: {} | 错字率: {}%",
+        session.config.preset.label(),
         if session.config.cjk_segmentation {
+            "开启"
+        } else {
+            "关闭"
+        },
+        if session.config.pair_matching {
             "开启"
         } else {
             "关闭"

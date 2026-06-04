@@ -1,13 +1,15 @@
 #[cfg(test)]
 mod typo_tests {
-    use crate::typing::TypingConfig;
     use crate::typing::dictionary_typo::{build_typo_prefixes, typo_candidate_for_word};
     use crate::typing::token::{InputToken, TokenKind};
     use crate::typing::typo::{can_simulate_typo, plan_for_token, should_apply_typo};
+    use crate::typing::{TypingConfig, TypingPreset};
 
     fn config(base_interval_ms: u64, typo_simulation: bool) -> TypingConfig {
         TypingConfig {
+            preset: TypingPreset::Custom,
             cjk_segmentation: true,
+            pair_matching: true,
             base_interval_ms,
             skip_word_inner_delay: false,
             typo_simulation,

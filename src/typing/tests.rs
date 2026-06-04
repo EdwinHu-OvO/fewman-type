@@ -1,4 +1,3 @@
-use super::TypingConfig;
 use super::frequency::frequency_scale_per_mille;
 use super::timing::{
     backspace_delay, cjk_word_delay_budget_ms, delay_after, delay_before, delay_inside,
@@ -7,9 +6,48 @@ use super::timing::{
 use super::token::{InputToken, TokenKind};
 use super::tokenizer::tokenize_with_config;
 use super::yaml_words::parse_yaml_word_entries;
+use super::{TypingConfig, TypingPreset};
 
 fn tokenize(text: &str) -> Vec<InputToken> {
     tokenize_with_config(text, TypingConfig::default())
+}
+
+#[test]
+fn default_config_uses_human_preset() {
+    let config = TypingConfig::default();
+    assert_eq!(config.preset, TypingPreset::Human);
+    assert_eq!(config.base_interval_ms, 180);
+    assert!(config.pair_matching);
+    assert!(!config.skip_word_inner_delay);
+    assert!(config.typo_simulation);
+    assert_eq!(config.typo_rate_percent, 6);
+}
+
+#[test]
+fn fast_preset_disables_typo_simulation() {
+    let config = TypingConfig::with_preset(TypingPreset::Fast);
+    assert_eq!(config.preset, TypingPreset::Fast);
+    assert_eq!(config.base_interval_ms, 45);
+    assert!(!config.pair_matching);
+    assert!(config.skip_word_inner_delay);
+    assert!(!config.typo_simulation);
+    assert_eq!(config.typo_rate_percent, 0);
+}
+
+#[test]
+fn preset_labels_are_user_facing() {
+    assert_eq!(TypingPreset::Fast.label(), "急速");
+    assert_eq!(TypingPreset::Human.label(), "一键拟人");
+    assert_eq!(TypingPreset::Custom.label(), "自定义");
+}
+
+#[test]
+fn mark_custom_only_changes_preset_marker() {
+    let mut config = TypingConfig::with_preset(TypingPreset::Fast);
+    config.mark_custom();
+    assert_eq!(config.preset, TypingPreset::Custom);
+    assert_eq!(config.base_interval_ms, 45);
+    assert!(!config.typo_simulation);
 }
 
 #[test]
@@ -57,7 +95,9 @@ fn can_disable_chinese_segmentation() {
     let tokens = tokenize_with_config(
         "中文",
         TypingConfig {
+            preset: TypingPreset::Custom,
             cjk_segmentation: false,
+            pair_matching: true,
             base_interval_ms: 50,
             skip_word_inner_delay: false,
             typo_simulation: false,
@@ -72,7 +112,9 @@ fn can_disable_chinese_segmentation() {
 fn cjk_word_total_delay_matches_budget_before_the_word() {
     let token = InputToken::new("自动输入器", TokenKind::CjkWord);
     let config = TypingConfig {
+        preset: TypingPreset::Custom,
         cjk_segmentation: true,
+        pair_matching: true,
         base_interval_ms: 50,
         skip_word_inner_delay: false,
         typo_simulation: false,
@@ -92,7 +134,9 @@ fn cjk_word_total_delay_matches_budget_before_the_word() {
 fn can_skip_cjk_word_inner_delay() {
     let token = InputToken::new("自动输入器", TokenKind::CjkWord);
     let config = TypingConfig {
+        preset: TypingPreset::Custom,
         cjk_segmentation: true,
+        pair_matching: true,
         base_interval_ms: 50,
         skip_word_inner_delay: true,
         typo_simulation: false,
@@ -110,7 +154,9 @@ fn can_skip_cjk_word_inner_delay() {
 #[test]
 fn cjk_word_delay_uses_length_scales() {
     let config = TypingConfig {
+        preset: TypingPreset::Custom,
         cjk_segmentation: true,
+        pair_matching: true,
         base_interval_ms: 100,
         skip_word_inner_delay: false,
         typo_simulation: false,
@@ -137,7 +183,9 @@ fn cjk_word_delay_uses_length_scales() {
 #[test]
 fn first_backspace_delay_is_slowed_by_twenty_percent() {
     let config = TypingConfig {
+        preset: TypingPreset::Custom,
         cjk_segmentation: true,
+        pair_matching: true,
         base_interval_ms: 50,
         skip_word_inner_delay: false,
         typo_simulation: false,
@@ -150,7 +198,9 @@ fn first_backspace_delay_is_slowed_by_twenty_percent() {
 #[test]
 fn backspace_delay_smoothly_caps_at_eight_hundred_ms() {
     let config = |base_interval_ms| TypingConfig {
+        preset: TypingPreset::Custom,
         cjk_segmentation: true,
+        pair_matching: true,
         base_interval_ms,
         skip_word_inner_delay: false,
         typo_simulation: false,
@@ -168,7 +218,9 @@ fn backspace_delay_smoothly_caps_at_eight_hundred_ms() {
 fn typo_retype_delay_uses_cjk_budget_when_inner_delay_is_skipped() {
     let token = InputToken::new("自动输入器", TokenKind::CjkWord);
     let config = TypingConfig {
+        preset: TypingPreset::Custom,
         cjk_segmentation: true,
+        pair_matching: true,
         base_interval_ms: 50,
         skip_word_inner_delay: true,
         typo_simulation: true,

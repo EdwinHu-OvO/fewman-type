@@ -47,15 +47,4 @@ impl InputPage {
             format!("词库      {} 份外挂", self.dictionaries.len())
         }
     }
-
-    pub(super) fn dictionary_detail_line(&self, index: usize) -> String {
-        if index == 1 && self.dictionaries.len() > 2 {
-            return format!("          另有 {} 份...", self.dictionaries.len() - 1);
-        }
-
-        self.dictionaries
-            .get(index)
-            .map(|name| format!("          {name}"))
-            .unwrap_or_default()
-    }
 }

@@ -5,7 +5,7 @@ use super::tokenizer::tokenize_with_config;
 
 fn action_labels(text: &str) -> Vec<String> {
     let tokens = tokenize_with_config(text, TypingConfig::default());
-    plan_input_actions(tokens)
+    plan_input_actions(tokens, true)
         .iter()
         .map(action_label)
         .collect()
@@ -33,6 +33,14 @@ fn plans_angle_brackets() {
         action_labels("a<b>c"),
         vec!["0:a", "1:<", "3:>", "←", "2:b", "→", "4:c"]
     );
+}
+
+#[test]
+fn can_disable_pair_matching() {
+    let tokens = tokenize_with_config("a(b)c", TypingConfig::default());
+    let actions = plan_input_actions(tokens, false);
+    let labels: Vec<_> = actions.iter().map(action_label).collect();
+    assert_eq!(labels, vec!["0:a", "1:(", "2:b", "3:)", "4:c"]);
 }
 
 #[test]
@@ -119,7 +127,7 @@ fn plans_full_width_pairs() {
 #[test]
 fn preserves_cjk_token_inside_pair() {
     let tokens = tokenize_with_config("(自动输入器)", TypingConfig::default());
-    let actions = plan_input_actions(tokens);
+    let actions = plan_input_actions(tokens, true);
     let Some(InputAction::Token { token, token_index }) = actions.get(3) else {
         panic!("expected inner CJK token action");
     };

@@ -14,7 +14,7 @@ mod typo;
 mod word_files;
 mod yaml_words;
 
-pub use config::TypingConfig;
+pub use config::{TypingConfig, TypingPreset};
 pub use dictionary::dictionary_sources;
 pub use engine::type_text;
 

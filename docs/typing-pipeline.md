@@ -8,7 +8,7 @@
 原始文本
   -> tokenize_with_config
   -> InputToken 列表
-  -> input_plan 生成 token / 光标移动动作
+  -> input_plan 按配置生成 token / 光标移动动作
   -> delay_before
   -> 可选 typo plan
   -> type_token / typo wrong-backspace-retype / press_return / cursor move
@@ -51,7 +51,7 @@ Trie 匹配位于 `src/typing/trie.rs`。它从当前位置逐字向前走前缀
 
 ## 成对符号输入计划
 
-`input_plan.rs` 会在 token 化之后，把 `InputToken` 列表转换为输入动作。对于已匹配的非空成对符号，会先输入开符号和闭符号，再发送左方向键进入符号内部，输入内部内容后发送右方向键移出。
+`input_plan.rs` 会在 token 化之后，把 `InputToken` 列表转换为输入动作。成对符号智能输入由 `TypingConfig.pair_matching` 控制；开启时，对于已匹配的非空成对符号，会先输入开符号和闭符号，再发送左方向键进入符号内部，输入内部内容后发送右方向键移出。关闭时，所有 token 按原顺序线性输出，不生成左右方向键动作。
 
 示例：
 
@@ -68,6 +68,7 @@ Trie 匹配位于 `src/typing/trie.rs`。它从当前位置逐字向前走前缀
 
 规则：
 
+- 默认“一键拟人”开启符号匹配，“急速”关闭符号匹配，手动切换后进入“自定义”。
 - 支持嵌套成对符号，例如 `a(b[c]d)e`。
 - 只向开符号后方扫描最多 50 个原文字符；50 字内找不到有效闭符号时，当前开符号按普通字符处理，后续 token 继续按当前规则规划。
 - 空对如 `()` 按普通 token 输入，不额外移动光标。

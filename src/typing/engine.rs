@@ -19,7 +19,7 @@ pub fn type_text(
     should_exit: &AtomicBool,
 ) -> bool {
     let tokens = tokenize_with_config(text, config);
-    for action in plan_input_actions(tokens) {
+    for action in plan_input_actions(tokens, config.pair_matching) {
         if !execute_action(enigo, action, config, should_exit) {
             return false;
         }

@@ -2,13 +2,20 @@ use cursive::theme::{Color, ColorStyle};
 use cursive::{Printer, Vec2};
 
 pub(super) const HEADER_HEIGHT: usize = 12;
-pub(super) const FOOTER_LINE: &str = " Ctrl+Enter / F2 提交  |  Esc 退出 ";
+pub(super) const INPUT_FOOTER_LINE: &str = " F3 配置  |  Ctrl+Enter / F2 确认  |  Esc 退出 ";
+pub(super) const CONFIG_FOOTER_LINE: &str =
+    " ↑↓ 选择  |  ←→ 调整设置  |  F3 / Esc 返回  |  Ctrl+Enter / F2 确认 ";
 pub(super) const FIXED_HEIGHT: usize = HEADER_HEIGHT + 3;
 
-pub(super) const LOGO_LINES: [&str; 3] = [
-    "  ╔═╗┌─┐┬ ┬┌┬┐┌─┐┌┐┌",
-    "  ╠╣ ├┤ ││││││├─┤│││",
-    "  ╚  └─┘└┴┘┴ ┴┴ ┴┘└┘  TYPE",
+pub(super) const LOGO_LINES: [&str; 8] = [
+    r"  ______                               _______               ",
+    r" |  ____|                             |__   __|              ",
+    r" | |__ _____      ___ __ ___   __ _ _ __ | |_   _ _ __   ___ ",
+    r" |  __/ _ \ \ /\ / / '_ ` _ \ / _` | '_ \| | | | | '_ \ / _ \",
+    r" | | |  __/\ V  V /| | | | | | (_| | | | | | |_| | |_) |  __/",
+    r" |_|  \___| \_/\_/ |_| |_| |_|\__,_|_| |_|_|\__, | .__/ \___|",
+    r"                                             __/ | |         ",
+    r"                                            |___/|_|         ",
 ];
 
 pub(super) fn input_y() -> usize {
@@ -27,7 +34,7 @@ pub(super) fn print_hline(printer: &Printer, y: usize) {
 
 pub(super) fn print_text(printer: &Printer, y: usize, text: &str) {
     if y < printer.size.y {
-        printer.print((0, y), text);
+        printer.print((1, y), text);
     }
 }
 

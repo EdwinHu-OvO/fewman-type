@@ -1,36 +1,43 @@
 use super::page::InputPage;
 use super::render::{accent, muted, print_text};
 use super::state::Page;
+use crate::typing::{TypingConfig, TypingPreset};
 use cursive::Printer;
 use cursive::event::{Event, EventResult, Key};
+const CONFIG_ROWS: [(&str, &str); 7] = [
+    ("预设模式", "←/→ 切换预设"),
+    ("中文拆词", "←/→ 切换中文词组节奏"),
+    ("符号匹配", "←/→ 切换成对符号智能输入"),
+    ("输入间隔", "←/→ 调整基础间隔"),
+    ("词内间隔", "←/→ 切换词组内部停顿"),
+    ("错字模拟", "←/→ 切换模拟打错再修正"),
+    ("错字率", "←/→ 调整触发概率"),
+];
 
 impl InputPage {
     pub(super) fn draw_config_page(&self, printer: &Printer, y: usize, height: usize) {
-        let lines = [
-            " 配置页",
-            " 使用 ↑/↓ 选择配置项，←/→ 调整数值，Space 切换开关，F3 返回输入页。",
+        let intro = [
+            " 配置",
+            " 使用 ↑/↓ 选择，←/→ 调整设置，F3 / Esc 返回输入页。",
             "",
-            "中文拆词模式",
-            "输入间隔",
-            "实验：关闭词组内间隔",
-            "错字模拟",
-            "错字率",
         ];
-        let values = self.config_values();
+        for (offset, line) in intro.iter().enumerate().take(height) {
+            draw_config_intro(printer, y + offset, offset, line);
+        }
 
-        for (offset, label) in lines.iter().enumerate().take(height) {
-            let row = y + offset;
-            if offset < 3 {
-                draw_config_intro(printer, row, offset, label);
-                continue;
+        let values = self.config_values();
+        for (index, (label, hint)) in CONFIG_ROWS.iter().enumerate() {
+            let offset = index + intro.len();
+            if offset >= height {
+                break;
             }
-            self.draw_config_item(printer, row, offset - 3, label, &values[offset]);
+            self.draw_config_item(printer, y + offset, index, label, &values[index], hint);
         }
     }
 
     pub(super) fn handle_config_event(&mut self, event: Event) -> EventResult {
         match event {
-            Event::Key(Key::F3) => {
+            Event::Key(Key::F3) | Event::Key(Key::Esc) => {
                 self.page = Page::Input;
                 EventResult::consumed()
             }
@@ -39,40 +46,23 @@ impl InputPage {
                 EventResult::consumed()
             }
             Event::Key(Key::Down) => {
-                self.selected_config = (self.selected_config + 1).min(4);
+                self.selected_config = (self.selected_config + 1).min(CONFIG_ROWS.len() - 1);
                 EventResult::consumed()
             }
-            Event::Key(Key::Left) => self.adjust_selected_number(-5),
-            Event::Key(Key::Right) => self.adjust_selected_number(5),
-            Event::Char(' ') => self.toggle_selected_config(),
+            Event::Key(Key::Left) => self.adjust_selected_value(-5),
+            Event::Key(Key::Right) => self.adjust_selected_value(5),
             _ => EventResult::Ignored,
         }
     }
 
-    fn config_values(&self) -> [String; 8] {
-        let split = if self.config.cjk_segmentation {
-            "开启"
-        } else {
-            "关闭"
-        };
-        let inner = if self.config.skip_word_inner_delay {
-            "开启"
-        } else {
-            "关闭"
-        };
-        let typo = if self.config.typo_simulation {
-            "开启"
-        } else {
-            "关闭"
-        };
+    fn config_values(&self) -> [String; 7] {
         [
-            String::new(),
-            String::new(),
-            String::new(),
-            format!("[{split}]"),
+            format!("[{}]", self.config.preset.label()),
+            format!("[{}]", switch_label(self.config.cjk_segmentation)),
+            format!("[{}]", switch_label(self.config.pair_matching)),
             format!("{} ms", self.config.base_interval_ms),
-            format!("[{inner}]"),
-            format!("[{typo}]"),
+            format!("[{}]", switch_label(!self.config.skip_word_inner_delay)),
+            format!("[{}]", switch_label(self.config.typo_simulation)),
             format!("{}%", self.config.typo_rate_percent),
         ]
     }
@@ -84,10 +74,11 @@ impl InputPage {
         index: usize,
         label: &str,
         value: &str,
+        hint: &str,
     ) {
         let selected = self.selected_config == index;
         let marker = if selected { ">" } else { " " };
-        let text = format!(" {marker} {label:<12} {value}");
+        let text = format!(" {marker} {label:<10} {value:<8} {hint}");
         if selected {
             printer.with_color(accent(), |printer| print_text(printer, row, &text));
         } else {
@@ -95,33 +86,53 @@ impl InputPage {
         }
     }
 
-    fn adjust_selected_number(&mut self, delta: i64) -> EventResult {
+    fn adjust_selected_value(&mut self, delta: i64) -> EventResult {
         match self.selected_config {
-            1 => {
+            0 => self.apply_preset(shift_preset(self.config.preset, delta)),
+            1 => self.config.cjk_segmentation = !self.config.cjk_segmentation,
+            2 => self.config.pair_matching = !self.config.pair_matching,
+            3 => {
                 let value = (self.config.base_interval_ms as i64 + delta).clamp(10, 1000);
                 self.config.base_interval_ms = value as u64;
-                self.mirror_config();
             }
-            4 => {
+            4 => self.config.skip_word_inner_delay = !self.config.skip_word_inner_delay,
+            5 => self.config.typo_simulation = !self.config.typo_simulation,
+            6 => {
                 let value = (self.config.typo_rate_percent as i64 + delta).clamp(0, 100);
                 self.config.typo_rate_percent = value as u8;
-                self.mirror_config();
             }
             _ => {}
         }
+
+        if self.selected_config != 0 {
+            self.config.mark_custom();
+        }
+        self.mirror_config();
+
         EventResult::consumed()
     }
 
-    fn toggle_selected_config(&mut self) -> EventResult {
-        match self.selected_config {
-            0 => self.config.cjk_segmentation = !self.config.cjk_segmentation,
-            2 => self.config.skip_word_inner_delay = !self.config.skip_word_inner_delay,
-            3 => self.config.typo_simulation = !self.config.typo_simulation,
-            _ => return EventResult::consumed(),
+    fn apply_preset(&mut self, preset: TypingPreset) {
+        match preset {
+            TypingPreset::Fast | TypingPreset::Human => {
+                self.config = TypingConfig::with_preset(preset);
+            }
+            TypingPreset::Custom => self.config.mark_custom(),
         }
         self.mirror_config();
-        EventResult::consumed()
     }
+}
+
+fn shift_preset(preset: TypingPreset, delta: i64) -> TypingPreset {
+    if delta < 0 {
+        preset.previous()
+    } else {
+        preset.next()
+    }
+}
+
+fn switch_label(enabled: bool) -> &'static str {
+    if enabled { "开启" } else { "关闭" }
 }
 
 fn draw_config_intro(printer: &Printer, row: usize, offset: usize, label: &str) {

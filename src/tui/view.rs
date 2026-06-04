@@ -1,6 +1,7 @@
 use super::page::InputPage;
 use super::render::{
-    FOOTER_LINE, HEADER_HEIGHT, input_y, max_textarea_height, print_hline, print_text,
+    CONFIG_FOOTER_LINE, HEADER_HEIGHT, INPUT_FOOTER_LINE, input_y, max_textarea_height, muted,
+    print_hline, print_text,
 };
 use super::state::Page;
 use cursive::direction::Direction;
@@ -21,7 +22,7 @@ impl View for InputPage {
         print_hline(printer, top_line_y);
         self.draw_body(printer, input_y);
         print_hline(printer, bottom_line_y);
-        print_text(printer, footer_y, FOOTER_LINE);
+        print_text(printer, footer_y, self.footer_line());
     }
 
     fn layout(&mut self, size: Vec2) {
@@ -93,6 +94,21 @@ impl InputPage {
             .cropped(Vec2::new(printer.size.x, height))
             .focused(printer.focused);
         self.textarea.draw(&printer);
+        if self.textarea.get_content().trim().is_empty() {
+            printer.with_color(muted(), |printer| {
+                printer.print(
+                    (2, 0),
+                    "在这里粘贴或输入文本。确认后此窗口关闭，目标窗口按 Ctrl+V 开始自动输入。",
+                );
+            });
+        }
+    }
+
+    fn footer_line(&self) -> &'static str {
+        match self.page {
+            Page::Input => INPUT_FOOTER_LINE,
+            Page::Config => CONFIG_FOOTER_LINE,
+        }
     }
 
     fn toggle_page(&mut self) {

@@ -1,6 +1,5 @@
 use super::page::InputPage;
 use super::render::{LOGO_LINES, accent, muted, print_text};
-use super::state::Page;
 use cursive::Printer;
 
 impl InputPage {
@@ -12,7 +11,7 @@ impl InputPage {
 
         let right = width - 1;
         let bottom = super::render::HEADER_HEIGHT.saturating_sub(1);
-        let divider_x = if width >= 96 { 44 } else { width / 2 };
+        let divider_x = width.saturating_mul(3) / 4;
         draw_frame(printer, right, bottom, divider_x);
         self.draw_header_left(printer, bottom);
         self.draw_header_right(printer, right, bottom, divider_x);
@@ -26,16 +25,6 @@ impl InputPage {
             }
             printer.with_color(accent(), |printer| print_text(printer, y, line));
         }
-
-        print_text(printer, 6, "  Ready to type like paste is a keyboard.");
-        printer.with_color(muted(), |printer| {
-            print_text(
-                printer,
-                8,
-                "  粘贴文本到下方，确认后移动光标并按 Ctrl+V 开始。",
-            );
-            print_text(printer, 9, "  F3 配置，Esc 退出，Ctrl+Enter / F2 提交。");
-        });
     }
 
     fn draw_header_right(&self, printer: &Printer, right: usize, bottom: usize, divider_x: usize) {
@@ -54,36 +43,11 @@ impl InputPage {
         }
     }
 
-    fn config_preview_lines(&self) -> [String; 9] {
-        let mode = match self.page {
-            Page::Input => "输入页",
-            Page::Config => "配置页",
-        };
-        let split = if self.config.cjk_segmentation {
-            "开启"
-        } else {
-            "关闭"
-        };
-        let inner = if self.config.skip_word_inner_delay {
-            "关闭"
-        } else {
-            "开启"
-        };
-        let typo = if self.config.typo_simulation {
-            "开启"
-        } else {
-            "关闭"
-        };
+    fn config_preview_lines(&self) -> [String; 3] {
         [
-            "配置预览".to_string(),
-            format!("当前页    {mode}"),
-            format!("输入间隔  {} ms", self.config.base_interval_ms),
-            format!("中文拆词  {split}"),
-            format!("词内间隔  {inner}"),
-            format!("错字模拟  {typo} {}%", self.config.typo_rate_percent),
+            format!("预设      {}", self.config.preset.label()),
+            format!("速度      {} ms", self.config.base_interval_ms),
             self.dictionary_summary_line(),
-            self.dictionary_detail_line(0),
-            "触发键    Ctrl+V".to_string(),
         ]
     }
 }
@@ -93,7 +57,7 @@ fn draw_frame(printer: &Printer, right: usize, bottom: usize, divider_x: usize) 
         printer.print((0, 0), "╭");
         printer.print_hline((1, 0), printer.size.x.saturating_sub(2), "─");
         printer.print((right, 0), "╮");
-        printer.print((2, 0), " FewmanType ");
+        printer.print((2, 0), " FewmanType-v1.0 ");
 
         for y in 1..bottom {
             printer.print((0, y), "│");
