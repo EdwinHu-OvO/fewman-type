@@ -1,9 +1,11 @@
 [package]
-name = "typer_rust"
-version = "0.1.0"
+name = "fewman_type_rs"
+version = "1.0.0"
 edition = "2024"
 
 [dependencies]
 enigo = "0.1"
 rdev = { version = "0.5.3", features = ["unstable_grab"] }
-cursive = { version = "0.21.1", default-features = false, features = ["crossterm-backend"] }
+cursive = { version = "0.21.1", default-features = false, features = [
+    "crossterm-backend",
+] }

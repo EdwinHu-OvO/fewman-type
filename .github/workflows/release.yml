@@ -52,6 +52,7 @@ jobs:
         if: matrix.os == 'windows-latest'
         run: |
           cd target\${{ matrix.target }}\release
+          ren fewman_type_rs.exe ${{ matrix.executable }}
           7z a ../../../fewman-type-${{ github.ref_name }}-${{ matrix.target }}.${{ matrix.ext }} ${{ matrix.executable }}
         shell: cmd
 
@@ -59,6 +60,7 @@ jobs:
         if: matrix.os != 'windows-latest'
         run: |
           cd target/${{ matrix.target }}/release
+          mv fewman_type_rs ${{ matrix.executable }}
           tar -czvf ../../../fewman-type-${{ github.ref_name }}-${{ matrix.target }}.${{ matrix.ext }} ${{ matrix.executable }}
 
       - name: Upload Artifact
