@@ -5,34 +5,18 @@ use std::path::{Path, PathBuf};
 pub(crate) fn dictionary_files() -> Vec<PathBuf> {
     let mut files = Vec::new();
     let mut seen_files = HashSet::new();
-    for dir in search_dirs() {
+    if let Some(dir) = executable_dir() {
         collect_word_files(&dir, &mut seen_files, &mut files);
     }
     files.sort_by(|a, b| a.file_name().cmp(&b.file_name()));
     files
 }
 
-fn search_dirs() -> Vec<PathBuf> {
-    let mut dirs = Vec::new();
-    if let Ok(dir) = std::env::current_dir() {
-        dirs.push(dir);
-    }
-    if let Ok(exe) = std::env::current_exe()
-        && let Some(dir) = exe.parent()
-    {
-        dirs.push(dir.to_path_buf());
-    }
-    dedupe_dirs(dirs)
-}
-
-fn dedupe_dirs(dirs: Vec<PathBuf>) -> Vec<PathBuf> {
-    let mut seen = HashSet::new();
-    dirs.into_iter()
-        .filter_map(|dir| {
-            let canonical = dir.canonicalize().unwrap_or(dir);
-            seen.insert(canonical.clone()).then_some(canonical)
-        })
-        .collect()
+fn executable_dir() -> Option<PathBuf> {
+    std::env::current_exe()
+        .ok()
+        .and_then(|exe| exe.parent().map(Path::to_path_buf))
+        .map(|dir| dir.canonicalize().unwrap_or(dir))
 }
 
 fn collect_word_files(dir: &Path, seen: &mut HashSet<PathBuf>, files: &mut Vec<PathBuf>) {
