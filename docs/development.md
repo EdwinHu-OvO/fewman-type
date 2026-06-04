@@ -37,6 +37,7 @@ cargo check
 | 新配置项 | `typing/config.rs`, `tui/config_page.rs`, `tui/header.rs` |
 | 新输入节奏 | `typing/timing.rs`, `typing/tests.rs` |
 | 新词频规则 | `typing/frequency.rs`, `typing/timing.rs` |
+| 新成对符号输入规则 | `typing/input_plan.rs`, `typing/input_plan_tests.rs`, `typing/engine.rs` |
 | 新错字模拟规则 | `typing/typo.rs`, `typing/dictionary_typo.rs`, `typing/engine.rs` |
 | 新词库字段 | `typing/yaml_words.rs`, `typing/dictionary.rs` |
 | 新拆词规则 | `typing/tokenizer.rs`, `typing/dictionary.rs`, `typing/trie.rs` |
@@ -56,6 +57,7 @@ cargo check
 - 词长倍率。
 - YAML 词频解析。
 - 词频倍率不会快于 `1.0x`。
+- 成对符号输入计划、50 字匹配上限、嵌套匹配、未匹配回退、孤儿闭符号处理和原 token 索引保留。
 - 错字模拟启用阈值和错字率命中规则。
 - 基于最短前缀的错字候选查找。
 - 错字输入计划的基本合法性。

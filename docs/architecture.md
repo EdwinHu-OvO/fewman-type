@@ -35,6 +35,7 @@ src/
 | `char_class.rs` | 字符分类和稳定抖动 |
 | `common_words.rs` | 项目专用内置词和内置高频词入口 |
 | `tokenizer.rs` | 文本 token 化，中文拆词 |
+| `input_plan.rs` | 将 token 转成输入动作，处理成对符号的光标移动计划 |
 | `dictionary.rs` | 词典加载、最长匹配、词频查询 |
 | `trie.rs` | 前缀树索引，用于中文词组最长匹配 |
 | `dictionary_typo.rs` | 基于词库前缀构造错字候选 |
@@ -80,6 +81,7 @@ TUI 输入文本和配置
   -> main.rs 等待 Ctrl+V
   -> typing::type_text
   -> tokenizer 拆成 token
+  -> input_plan 生成 token 和光标移动输入动作
   -> 可选 typo 计划生成错误词、退格和重打内容
   -> timing 计算词前/词内/词后、退格和重打延迟
   -> engine 调用 enigo 输出
@@ -88,6 +90,7 @@ TUI 输入文本和配置
 ## 维护边界
 
 - 新增输入节奏规则：改 `typing/timing.rs`，必要时改 `typing/frequency.rs`。
+- 新增成对符号输入规则：改 `typing/input_plan.rs` 和 `typing/input_plan_tests.rs`，必要时改 `typing/engine.rs`。
 - 新增错字模拟规则：改 `typing/typo.rs`、`typing/dictionary_typo.rs`，必要时改 `typing/engine.rs` 和 `typing/timing.rs`。
 - 新增词库字段：改 `typing/yaml_words.rs` 和 `typing/dictionary.rs`。
 - 新增 TUI 配置项：同时改 `typing/config.rs`、`tui/config_page.rs`、`tui/header.rs`。

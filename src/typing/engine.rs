@@ -1,4 +1,5 @@
 use super::config::TypingConfig;
+use super::input_plan::{InputAction, plan_input_actions};
 use super::timing::{
     backspace_delay, delay_after, delay_before, delay_inside, first_backspace_delay,
     typo_retype_delay,
@@ -17,30 +18,64 @@ pub fn type_text(
     config: TypingConfig,
     should_exit: &AtomicBool,
 ) -> bool {
-    for (index, token) in tokenize_with_config(text, config).into_iter().enumerate() {
-        if cancelled(should_exit) {
-            return false;
-        }
-
-        if !sleep_cancellable(delay_before(&token, config), should_exit) {
-            return false;
-        }
-
-        match token.kind {
-            TokenKind::Newline => press_return(enigo),
-            _ => {
-                if !type_token(enigo, &token, index, config, should_exit) {
-                    return false;
-                }
-            }
-        }
-
-        if !sleep_cancellable(delay_after(&token, index, config), should_exit) {
+    let tokens = tokenize_with_config(text, config);
+    for action in plan_input_actions(tokens) {
+        if !execute_action(enigo, action, config, should_exit) {
             return false;
         }
     }
 
     true
+}
+
+fn execute_action(
+    enigo: &mut Enigo,
+    action: InputAction,
+    config: TypingConfig,
+    should_exit: &AtomicBool,
+) -> bool {
+    match action {
+        InputAction::Token { token, token_index } => {
+            execute_token_action(enigo, &token, token_index, config, should_exit)
+        }
+        InputAction::MoveLeft => press_cursor_key(enigo, enigo::Key::LeftArrow, should_exit),
+        InputAction::MoveRight => press_cursor_key(enigo, enigo::Key::RightArrow, should_exit),
+    }
+}
+
+fn execute_token_action(
+    enigo: &mut Enigo,
+    token: &InputToken,
+    index: usize,
+    config: TypingConfig,
+    should_exit: &AtomicBool,
+) -> bool {
+    if cancelled(should_exit) {
+        return false;
+    }
+
+    if !sleep_cancellable(delay_before(token, config), should_exit) {
+        return false;
+    }
+
+    match token.kind {
+        TokenKind::Newline => press_return(enigo),
+        _ => {
+            if !type_token(enigo, token, index, config, should_exit) {
+                return false;
+            }
+        }
+    }
+
+    sleep_cancellable(delay_after(token, index, config), should_exit)
+}
+
+fn press_cursor_key(enigo: &mut Enigo, key: enigo::Key, should_exit: &AtomicBool) -> bool {
+    if cancelled(should_exit) {
+        return false;
+    }
+    enigo.key_click(key);
+    !cancelled(should_exit)
 }
 
 fn type_token(

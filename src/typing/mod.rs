@@ -5,6 +5,7 @@ mod dictionary;
 mod dictionary_typo;
 mod engine;
 mod frequency;
+mod input_plan;
 mod timing;
 mod token;
 mod tokenizer;
@@ -17,6 +18,8 @@ pub use config::TypingConfig;
 pub use dictionary::dictionary_sources;
 pub use engine::type_text;
 
+#[cfg(test)]
+mod input_plan_tests;
 #[cfg(test)]
 mod tests;
 #[cfg(test)]

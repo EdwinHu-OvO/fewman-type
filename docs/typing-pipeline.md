@@ -1,6 +1,6 @@
-# 输入流程、错字模拟与延迟策略
+# 输入流程、成对符号、错字模拟与延迟策略
 
-本文说明文本如何变成键盘输入，错字模拟如何插入输入流程，以及当前类人输入节奏是怎么计算的。
+本文说明文本如何变成键盘输入，成对符号和错字模拟如何插入输入流程，以及当前类人输入节奏是怎么计算的。
 
 ## 流程概览
 
@@ -8,9 +8,10 @@
 原始文本
   -> tokenize_with_config
   -> InputToken 列表
+  -> input_plan 生成 token / 光标移动动作
   -> delay_before
   -> 可选 typo plan
-  -> type_token / typo wrong-backspace-retype / press_return
+  -> type_token / typo wrong-backspace-retype / press_return / cursor move
   -> delay_inside / backspace_delay / typo_retype_delay
   -> delay_after
 ```
@@ -18,6 +19,7 @@
 对应文件：
 
 - `src/typing/tokenizer.rs`
+- `src/typing/input_plan.rs`
 - `src/typing/typo.rs`
 - `src/typing/dictionary_typo.rs`
 - `src/typing/timing.rs`
@@ -46,6 +48,32 @@
 - 关闭中文拆词时，每个 CJK 字符都是一个 `CjkWord`。
 
 Trie 匹配位于 `src/typing/trie.rs`。它从当前位置逐字向前走前缀树，并记录最后一个命中的词尾，避免为每个候选窗口反复构造 `String`。
+
+## 成对符号输入计划
+
+`input_plan.rs` 会在 token 化之后，把 `InputToken` 列表转换为输入动作。对于已匹配的非空成对符号，会先输入开符号和闭符号，再发送左方向键进入符号内部，输入内部内容后发送右方向键移出。
+
+示例：
+
+```text
+源文本：a(b)c
+输入动作：a -> ( -> ) -> ← -> b -> → -> c
+```
+
+当前支持的非对称成对符号：
+
+```text
+() [] {} <> （） 【】 《》 〈〉 「」 『』 “” ‘’
+```
+
+规则：
+
+- 支持嵌套成对符号，例如 `a(b[c]d)e`。
+- 只向开符号后方扫描最多 50 个原文字符；50 字内找不到有效闭符号时，当前开符号按普通字符处理，后续 token 继续按当前规则规划。
+- 空对如 `()` 按普通 token 输入，不额外移动光标。
+- 孤儿闭符号、未匹配或交叉错配的符号按普通字符处理，避免产生错误光标移动。
+- 规划动作保留原始 token 索引，确保词内延迟、词后延迟和错字模拟的稳定抖动不因输入顺序变化而漂移。
+- 该功能依赖目标输入区域支持普通左右方向键移动光标。
 
 ## 错字模拟
 
@@ -121,6 +149,7 @@ wrong_text -> backspaces -> retype_text
 - 改中文预算公式：优先改 `cjk_word_delay_budget_ms`。
 - 改词长倍率：优先改 `cjk_word_delay_scale_tenths`。
 - 改词频影响：优先改 `src/typing/frequency.rs`。
+- 改成对符号识别和匹配：优先改 `src/typing/input_plan.rs`，并同步更新 `src/typing/input_plan_tests.rs`。
 - 改错字候选：优先改 `src/typing/dictionary_typo.rs`。
 - 改错字计划或触发条件：优先改 `src/typing/typo.rs`。
 - 改词前/词内/词后分配：改 `delay_before`、`delay_inside`、`delay_after`。

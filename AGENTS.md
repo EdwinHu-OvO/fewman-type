@@ -21,6 +21,7 @@ AutoTyper 是一个 Rust TUI 自动输入工具。核心目标是把用户输入
 - `src/typing/char_class.rs`：字符分类和稳定抖动。
 - `src/typing/common_words.rs`：项目专用内置词和内置高频词入口。
 - `src/typing/tokenizer.rs`：文本 token 化和中文拆词。
+- `src/typing/input_plan.rs`：将 token 转成输入动作，处理成对符号的光标移动计划。
 - `src/typing/dictionary.rs`：词典加载、词频范围和查询。
 - `src/typing/trie.rs`：中文词组最长匹配前缀树。
 - `src/typing/dictionary_typo.rs`：基于词库前缀的错字候选。
@@ -101,6 +102,13 @@ words:
 ```
 
 - 不要把下载脚本、原始上游词库或临时转换产物长期放进项目；本项目只保留裁剪后的本地词库 YAML。
+
+## 成对符号输入约束
+
+- 成对符号计划位于 `src/typing/input_plan.rs`，不要把配对算法塞进 `engine.rs` 或 `tokenizer.rs`。
+- 仅对 50 个原文字符内已匹配的非空成对符号移动光标；空对、未匹配或交叉错配时，当前符号按普通字符处理，后续 token 继续按当前规则规划。
+- 孤儿闭符号按普通字符处理。
+- 支持嵌套成对符号；修改配对规则时同步更新 `src/typing/input_plan_tests.rs`。
 
 ## 错字模拟约束
 
