@@ -1,62 +1,68 @@
-# 类人输入 (FewmanType)
+<p align="center">
+  <a href="README.md">English</a> · <a href="README.zh-CN.md">简体中文</a>
+</p>
 
-**“离人很远了，但还在努力装得像个人。”**
+# Human-like Typing (FewmanType)
 
-**FewmanType**（发音形似 Human Type，意为“很少有人”，暗示离人很远）是一个基于 Rust 开发的整活项目。它的主要功能是把你粘贴进去的大段文本，通过“模拟真实人类敲击键盘”的方式，一字一句地自动输入到目标窗口中。
+**“Far from human, but still trying hard to look like one.”**
 
-无论是为了应付某些检测粘贴的系统，还是单纯为了在朋友面前装作自己手速惊人，它都能派上用场。
+**FewmanType** (pronounced similarly to “Human Type”; the name means “few humans,” hinting at how far it is from being human) is a Rust-powered project built for fun. It takes large blocks of text you paste and types them into the target window one character at a time, simulating the rhythm of a real person at a keyboard.
 
-本项目离人也很远了，完全vibe实现，娱乐对待！
+Whether you need to get around systems that detect pasted text or simply want to look impossibly fast in front of your friends, it may come in handy.
 
-## ✨ 核心特性
+This project is also very far from human: it was built entirely on vibes, so please treat it as entertainment!
 
-- **全局热键拦截**：复制好文本后，切到目标窗口按下 `Ctrl+V`，程序会拦截粘贴操作，并瞬间化身键盘侠开始自动打字。
-- **类人延迟机制**：支持基础输入间隔配置，每个字符之间的敲击延迟会有随机波动，告别机械式的匀速输入。
-- **三档预设**：支持“急速”“一键拟人”“自定义”，可以一键切换速度和拟人化程度，也可以手动微调。
-- **智能中文拆词**：支持加载外部词库进行 CJK 拆词。程序会把词组当成一个整体输入，词内打字速度极快，词间会有自然停顿，还原人类真实打字节奏。
-- **成对符号智能输入**：可配置开启。遇到匹配的 `()`、`<>`、`（）` 等成对符号时，会先输入一对符号，移动光标到内部完成内容输入，再移出光标。
-- **模拟错字与修正**：开启后会按错字率，从词库中寻找共享最短前缀的中文词作为“打错的词”，再退格并重打正确内容，模拟真人发现手误后的修正过程。
-- **随时紧急刹车**：如果打错地方了？别慌，随时按下 `ESC` 键即可紧急停止输入。
-- **终端图形界面 (TUI)**：简单易用的命令行图形界面，方便配置参数和输入要打字的文本。
+## ✨ Core Features
 
-## 🛠️ 安装与使用
+- **Global hotkey interception**: Copy your text, switch to the target window, and press `Ctrl+V`. The program intercepts the paste and immediately starts typing it for you.
+- **Human-like timing**: Configure a base typing interval with random variation between keystrokes, avoiding perfectly mechanical output.
+- **Three presets**: Switch between **Turbo**, **One-click Humanize**, and **Custom** presets, or fine-tune the settings yourself.
+- **Smart Chinese word segmentation**: Load external dictionaries for CJK segmentation. Word groups are entered as units, with very short delays within a word and natural pauses between words.
+- **Smart paired-symbol input**: Optionally handle matching pairs such as `()`, `<>`, and `（）` by typing the pair first, moving the cursor inside to enter the contents, and then moving back out.
+- **Typo simulation and correction**: When enabled, the program uses the typo rate to find a Chinese dictionary word sharing the shortest prefix, types the “wrong” word, then backspaces and retypes the correct text like a person correcting a mistake.
+- **Emergency stop at any time**: Press `ESC` whenever you need to stop the typing immediately.
+- **Terminal user interface (TUI)**: A simple command-line interface for configuring parameters and entering the text to type.
 
-### 准备工作
+## 🛠️ Installation and Usage
 
-请确保你的电脑上安装了 Rust 环境（[Rust 官网](https://www.rust-lang.org/)）。
+### Prerequisites
 
-### 编译运行
+Make sure Rust is installed on your computer ([Rust website](https://www.rust-lang.org/)).
 
-1. 克隆本仓库：
+### Build and Run
+
+1. Clone this repository:
 
    ```bash
    git clone https://github.com/EdwinHu-OvO/fewman-type-rs.git
    cd fewman-type-rs
    ```
 
-2. 运行程序：
+2. Run the program:
+
    ```bash
    cargo run --release
    ```
-   _(推荐使用 `--release` 构建，以获得更稳定的性能)_
 
-### 使用步骤
+   _(A `--release` build is recommended for more stable performance.)_
 
-1. 打开程序后，在 TUI 界面中输入或粘贴你想要“打”出来的文本。
-2. 选择**急速 / 一键拟人 / 自定义**预设，或手动调整**输入间隔**、**中文拆词**、**符号匹配**、**错字模拟 / 错字率**等参数，然后确认。
-3. 将鼠标光标点击到你想要输入的任何地方（比如微信聊天框、Word 文档、代码编辑器或某个网页中）。
-4. 按下 **`Ctrl+V`**，奇迹开始！
-5. 如果想中途退出，按下 **`ESC`** 键即可。
+### How to Use
 
-## 📝 配置文件与词库
+1. Launch the program and enter or paste the text you want it to type in the TUI.
+2. Choose the **Turbo / One-click Humanize / Custom** preset, or adjust the **typing interval**, **Chinese word segmentation**, **symbol matching**, and **typo simulation / typo rate** settings manually. Then confirm.
+3. Click the mouse where you want the text entered—for example, a chat box, Word document, code editor, or web page.
+4. Press **`Ctrl+V`** and let the magic begin!
+5. To stop partway through, press **`ESC`**.
 
-如果需要更强大的中文拆词和错字模拟体验，可以将词库文件（例如 `your_dict_words.yaml`）放置在可执行文件同目录下。程序启动时会自动检测并加载该目录中的 `*_words.yaml` 格式词库文件。如果未发现词库，程序将回退到内置的简易词表。
+## 📝 Configuration Files and Dictionaries
 
-开启错字模拟时，程序会在中文词组上按错字率尝试构造错误输入；候选来自同一词库中共享最短前缀的其他词，输入错误词后会退格并重打正确后缀。
+For stronger Chinese segmentation and typo simulation, place dictionary files such as `your_dict_words.yaml` in the same directory as the executable. At startup, the program automatically finds and loads dictionary files matching `*_words.yaml` in that directory. If none are found, it falls back to a small built-in word list.
 
-当前兼容两种格式。
+When typo simulation is enabled, the program attempts to construct incorrect input for Chinese word groups according to the typo rate. Candidates come from other words in the same dictionary that share the shortest prefix; after typing the wrong word, it backspaces and retypes the correct suffix.
 
-旧格式：
+Two formats are currently supported.
+
+Legacy format:
 
 ```yaml
 words:
@@ -64,7 +70,7 @@ words:
   - "世界"
 ```
 
-带词频格式：
+Format with frequencies:
 
 ```yaml
 words:
@@ -74,20 +80,20 @@ words:
     frequency: 678
 ```
 
-## ⚠️ 免责声明
+## ⚠️ Disclaimer
 
-本项目仅供学习、研究及**整活**使用。请勿用于破坏系统、作弊或其他违反相关平台规定的行为。由于过度真实的打字模拟可能导致您的朋友/同事/老师产生不必要的敬畏，作者对此不承担任何责任。整活项目，认真你就输了。
+This project is for learning, research, and **fun** only. Do not use it to damage systems, cheat, or violate the rules of any platform. Because an overly realistic typing simulation may cause your friends, coworkers, or teachers to hold you in unnecessary awe, the author accepts no responsibility. It is a fun project—taking it seriously defeats the point.
 
-## 第三方数据声明
+## Third-party Data
 
-本项目内置了从 `fxsjy/jieba` 的 `jieba/dict.txt` 中筛选出的 1000 个中文高频词，保存为 `data/jieba_builtin_words.tsv`，格式为 `词<TAB>词频`。
+The project includes 1,000 high-frequency Chinese words selected from `jieba/dict.txt` in `fxsjy/jieba`, stored in `data/jieba_builtin_words.tsv` in `word<TAB>frequency` format.
 
-该数据来源于结巴分词项目，原项目采用 MIT License：
+This data comes from the Jieba segmentation project, which is distributed under the MIT License:
 
-- 项目地址：https://github.com/fxsjy/jieba
-- 许可文件：https://github.com/fxsjy/jieba/blob/master/LICENSE
-- 本地许可文本：`licenses/jieba-MIT-LICENSE.txt`
-- 原始版权声明：Copyright (c) 2013 Sun Junyi
+- Project: https://github.com/fxsjy/jieba
+- License file: https://github.com/fxsjy/jieba/blob/master/LICENSE
+- Local license text: `licenses/jieba-MIT-LICENSE.txt`
+- Original copyright notice: Copyright (c) 2013 Sun Junyi
 
 ---
 
